@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de IMC</title>
+    <style>
+        :root {
+            --cor-primaria: #4a6cf7;
+            --cor-secundaria: #6e44ff;
+            --cor-destaque: #ff7c7c;
+            --cor-texto: #333;
+            --cor-clara: #f8f9fa;
+            --cor-escura: #343a40;
+            --raio-borda: 10px;
+            --sombra-caixa: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .cabecalho {
+            text-align: center;
+            padding: 20px;
+            background-color: white;
+            border-radius: var(--raio-borda);
+            box-shadow: var(--sombra-caixa);
+        }
+
+        .cabecalho h1 {
+            color: var(--cor-primaria);
+            margin-bottom: 10px;
+        }
+
+        .cabecalho p {
+            color: var(--cor-texto);
+            opacity: 0.8;
+        }
+
+        .conteudo-principal {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .conteudo-principal {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .cartao-calculadora, .cartao-resultado, .cartao-historico, .cartao-dicas {
+            background-color: white;
+            border-radius: var(--raio-borda);
+            padding: 25px;
+            box-shadow: var(--sombra-caixa);
+        }
+
+        .cartao-calculadora h2, .cartao-resultado h2, .cartao-historico h2, .cartao-dicas h2 {
+            color: var(--cor-primaria);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .grupo-entrada {
+            margin-bottom: 20px;
+        }
+
+        .grupo-entrada label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--cor-texto);
+            font-weight: 500;
+        }
+
+        .grupo-entrada input, .grupo-entrada select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .grupo-entrada input:focus, .grupo-entrada select:focus {
+            border-color: var(--cor-primaria);
+            outline: none;
+        }
+
+        .grupo-radio {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .opcao-radio {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .botao {
+            background: linear-gradient(to right, var(--cor-primaria), var(--cor-secundaria));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 100%;
+        }
+
+        .botao:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .exibicao-resultado {
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: var(--raio-borda);
+            background-color: #f8f9fa;
+        }
+
+        .valor-resultado {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--cor-primaria);
+        }
+
+        .categoria-resultado {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .normal {
+            color: #28a745;
+        }
+
+        .abaixo-peso {
+            color: #ffc107;
+        }
+
+        .sobrepeso {
+            color: #fd7e14;
+        }
+
+        .obeso {
+            color: #dc3545;
+        }
+
+        .dicas-personalizadas {
+            background-color: #f0f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .dicas-personalizadas h3 {
+            color: var(--cor-primaria);
+            margin-bottom: 10px;
+        }
+
+        .dicas-personalizadas ul {
+            padding-left: 20px;
+        }
+
+        .dicas-personalizadas li {
+            margin-bottom: 8px;
+        }
+
+        .item-historico {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item-historico:last-child {
+            border-bottom: none;
+        }
+
+        .grafico-progresso {
+            height: 200px;
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: flex-end;
+            gap: 5px;
+        }
+
+        .barra-grafico {
+            flex-grow: 1;
+            background-color: var(--cor-primaria);
+            border-radius: 3px 3px 0 0;
+            position: relative;
+            transition: height 0.5s;
+        }
+
+        .barra-grafico::after {
+            content: attr(data-valor);
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+        }
+
+        .cartoes-metricas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .cartao-metrica {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .cartao-metrica h3 {
+            font-size: 0.9rem;
+            color: var(--cor-texto);
+            margin-bottom: 5px;
+        }
+
+        .cartao-metrica p {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--cor-primaria);
+        }
+
+        .cartao-dicas ul {
+            padding-left: 20px;
+        }
+
+        .cartao-dicas li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="cabecalho">
+            <h1>Calculadora de IMC</h1>
+            <p>Calcule seu Índice de Massa Corporal e receba dicas personalizadas para melhorar sua saúde</p>
+        </header>
+
+        <div class="conteudo-principal">
+            <div class="cartao-calculadora">
+                <h2>Dados Pessoais</h2>
+                <div class="grupo-entrada">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" placeholder="Seu nome">
+                </div>
+                <div class="grupo-entrada">
+                    <label for="idade">Idade</label>
+                    <input type="number" id="idade" placeholder="Sua idade" min="1" max="120">
+                </div>
+                <div class="grupo-entrada">
+                    <label>Gênero</label>
+                    <div class="grupo-radio">
+                        <div class="opcao-radio">
+                            <input type="radio" id="masculino" name="genero" value="masculino" checked>
+                            <label for="masculino">Masculino</label>
+                        </div>
+                        <div class="opcao-radio">
+                            <input type="radio" id="feminino" name="genero" value="feminino">
+                            <label for="feminino">Feminino</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="grupo-entrada">
+                    <label for="altura">Altura (cm)</label>
+                    <input type="number" id="altura" placeholder="Ex: 175" min="50" max="250">
+                </div>
+                <div class="grupo-entrada">
+                    <label for="peso">Peso (kg)</label>
+                    <input type="number" id="peso" placeholder="Ex: 70.5" step="0.1" min="1" max="500">
+                </div>
+                <div class="grupo-entrada">
+                    <label for="atividade">Nível de Atividade Física</label>
+                    <select id="atividade">
+                        <option value="sedentario">Sedentário</option>
+                        <option value="levemente">Levemente ativo</option>
+                        <option value="moderado">Moderadamente ativo</option>
+                        <option value="ativo">Muito ativo</option>
+                        <option value="muitoAtivo">Extremamente ativo</option>
+                    </select>
+                </div>
+                <button id="botao-calcular" class="botao">Calcular IMC</button>
+            </div>
+
+            <div class="cartao-resultado">
+                <h2>Resultado</h2>
+                <div id="container-resultado" style="display: none;">
+                    <div class="exibicao-resultado">
+                        <div class="valor-resultado" id="valor-imc">--</div>
+                        <div class="categoria-resultado" id="categoria-imc">--</div>
+                        <div id="faixa-imc">Faixa ideal: 18.5 - 24.9</div>
+                    </div>
+
+                    <div class="cartoes-metricas">
+                        <div class="cartao-metrica">
+                            <h3>Peso Ideal</h3>
+                            <p id="peso-ideal">--</p>
+                        </div>
+                        <div class="cartao-metrica">
+                            <h3>Calorias/dia</h3>
+                            <p id="calorias-diarias">--</p>
+                        </div>
+                    </div>
+
+                    <div class="dicas-personalizadas">
+                        <h3>Dicas Personalizadas</h3>
+                        <ul id="lista-dicas-personalizadas"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cartao-historico">
+                <h2>Histórico</h2>
+                <div id="lista-historico">
+                    <p class="estado-vazio">Seu histórico aparecerá aqui.</p>
+                </div>
+                <div class="grafico-progresso" id="grafico-progresso"></div>
+            </div>
+
+            <div class="cartao-dicas">
+                <h2>Dicas de Saúde</h2>
+                <ul>
+                    <li><strong>Alimentação balanceada:</strong> Consuma uma variedade de alimentos, incluindo frutas, vegetais, proteínas magras e grãos integrais.</li>
+                    <li><strong>Hidratação:</strong> Beba pelo menos 2 litros de água por dia.</li>
+                    <li><strong>Exercícios físicos:</strong> Pratique atividades físicas por pelo menos 150 minutos por semana.</li>
+                    <li><strong>Sono adequado:</strong> Durma de 7 a 9 horas por noite para uma boa recuperação do corpo.</li>
+                    <li><strong>Consultas regulares:</strong> Faça check-ups médicos periódicos para monitorar sua saúde.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos
+            const botaoCalcular = document.getElementById('botao-calcular');
+            const containerResultado = document.getElementById('container-resultado');
+            const valorImc = document.getElementById('valor-imc');
+            const categoriaImc = document.getElementById('categoria-imc');
+            const pesoIdeal = document.getElementById('peso-ideal');
+            const caloriasDiarias = document.getElementById('calorias-diarias');
+            const listaDicasPersonalizadas = document.getElementById('lista-dicas-personalizadas');
+            const listaHistorico = document.getElementById('lista-historico');
+            const graficoProgresso = document.getElementById('grafico-progresso');
+
+            // Carregar histórico do localStorage
+            let historico = JSON.parse(localStorage.getItem('historicoImc')) || [];
+            atualizarExibicaoHistorico();
+            atualizarGraficoProgresso();
+
+            // Evento de clique no botão calcular
+            botaoCalcular.addEventListener('click', function() {
+                // Obter valores de entrada
+                const nome = document.getElementById('nome').value;
+                const idade = parseInt(document.getElementById('idade').value);
+                const genero = document.querySelector('input[name="genero"]:checked').value;
+                const altura = parseFloat(document.getElementById('altura').value);
+                const peso = parseFloat(document.getElementById('peso').value);
+                const nivelAtividade = document.getElementById('atividade').value;
+
+                // Validar entradas
+                if (!nome || !idade || !altura || !peso) {
+                    alert('Por favor, preencha todos os campos.');
+                    return;
+                }
+
+                // Calcular IMC
+                const alturaEmMetros = altura / 100;
+                const imc = peso / (alturaEmMetros * alturaEmMetros);
+                
+                // Determinar categoria do IMC
+                let categoria = '';
+                let classeCategoria = '';
+                
+                if (imc < 18.5) {
+                    categoria = 'Abaixo do peso';
+                    classeCategoria = 'abaixo-peso';
+                } else if (imc < 25) {
+                    categoria = 'Peso normal';
+                    classeCategoria = 'normal';
+                } else if (imc < 30) {
+                    categoria = 'Sobrepeso';
+                    classeCategoria = 'sobrepeso';
+                } else {
+                    categoria = 'Obesidade';
+                    classeCategoria = 'obeso';
+                }
+
+                // Calcular faixa de peso ideal
+                const pesoIdealMinimo = 18.5 * (alturaEmMetros * alturaEmMetros);
+                const pesoIdealMaximo = 24.9 * (alturaEmMetros * alturaEmMetros);
+                
+                // Calcular necessidades calóricas diárias
+                let tmb; // Taxa Metabólica Basal
+                if (genero === 'masculino') {
+                    tmb = 88.362 + (13.397 * peso) + (4.799 * altura) - (5.677 * idade);
+                } else {
+                    tmb = 447.593 + (9.247 * peso) + (3.098 * altura) - (4.330 * idade);
+                }
+                
+                // Aplicar fator de atividade
+                let fatorAtividade = 1.2; // Padrão sedentário
+                switch (nivelAtividade) {
+                    case 'levemente':
+                        fatorAtividade = 1.375;
+                        break;
+                    case 'moderado':
+                        fatorAtividade = 1.55;
+                        break;
+                    case 'ativo':
+                        fatorAtividade = 1.725;
+                        break;
+                    case 'muitoAtivo':
+                        fatorAtividade = 1.9;
+                        break;
+                }
+                
+                const necessidadeCalorica = Math.round(tmb * fatorAtividade);
+
+                // Obter dicas personalizadas com base na categoria do IMC
+                const dicas = obterDicasPersonalizadas(categoria, nivelAtividade, idade);
+
+                // Atualizar exibição de resultados
+                valorImc.textContent = imc.toFixed(1);
+                categoriaImc.textContent = categoria;
+                categoriaImc.className = 'categoria-resultado ' + classeCategoria;
+                pesoIdeal.textContent = `${pesoIdealMinimo.toFixed(1)} - ${pesoIdealMaximo.toFixed(1)} kg`;
+                caloriasDiarias.textContent = `${necessidadeCalorica} kcal`;
+                
+                // Atualizar dicas personalizadas
+                listaDicasPersonalizadas.innerHTML = '';
+                dicas.forEach(dica => {
+                    const li = document.createElement('li');
+                    li.textContent = dica;
+                    listaDicasPersonalizadas.appendChild(li);
+                });
+
+                // Salvar no histórico
+                const itemHistorico = {
+                    data: new Date().toLocaleDateString(),
+                    nome: nome,
+                    peso: peso,
+                    imc: imc.toFixed(1),
+                    categoria: categoria
+                };
+                
+                historico.push(itemHistorico);
+                if (historico.length > 10) {
+                    historico.shift(); // Manter apenas as últimas 10 entradas
+                }
+                localStorage.setItem('historicoImc', JSON.stringify(historico));
+                
+                // Atualizar exibição do histórico
+                atualizarExibicaoHistorico();
+                atualizarGraficoProgresso();
+
+                // Mostrar container de resultados
+                containerResultado.style.display = 'block';
+            });
+
+            // Função para obter dicas personalizadas
+            function obterDicasPersonalizadas(categoria, nivelAtividade, idade) {
+                const dicas = [];
+                
+                // Dicas básicas com base na categoria do IMC
+                if (categoria === 'Abaixo do peso') {
+                    dicas.push('Aumente o consumo de proteínas e carboidratos complexos.');
+                    dicas.push('Considere fazer refeições menores, mas mais frequentes.');
+                    dicas.push('Inclua alimentos calóricos, mas nutritivos como abacate, nozes e azeite de oliva.');
+                } else if (categoria === 'Peso normal') {
+                    dicas.push('Mantenha uma dieta balanceada e variada.');
+                    dicas.push('Continue com exercícios regulares para manter sua condição física.');
+                    dicas.push('Monitore seu peso periodicamente para manter a estabilidade.');
+                } else if (categoria === 'Sobrepeso') {
+                    dicas.push('Reduza o consumo de alimentos processados e açúcares.');
+                    dicas.push('Aumente o consumo de fibras para melhorar a saciedade.');
+                    dicas.push('Estabeleça um déficit calórico moderado de 300-500 calorias por dia.');
+                } else {
+                    dicas.push('Consulte um médico para uma avaliação completa de saúde.');
+                    dicas.push('Foque em perda de peso gradual e sustentável (0.5-1kg por semana).');
+                    dicas.push('Elimine bebidas açucaradas e alimentos ultraprocessados.');
+                }
+                
+                // Dicas adicionais com base no nível de atividade
+                if (nivelAtividade === 'sedentario') {
+                    dicas.push('Comece com caminhadas leves diárias de 15-30 minutos.');
+                    dicas.push('Procure ficar em pé e se movimentar por alguns minutos a cada hora.');
+                } else if (nivelAtividade === 'levemente' || nivelAtividade === 'moderado') {
+                    dicas.push('Tente aumentar a intensidade de seus exercícios progressivamente.');
+                    dicas.push('Adicione treinamento de força 2-3 vezes por semana para aumentar seu metabolismo.');
+                }
+                
+                // Dicas específicas para idade
+                if (idade < 18) {
+                    dicas.push('Em fase de crescimento, é importante garantir nutrientes adequados. Consulte um pediatra.');
+                } else if (idade > 50) {
+                    dicas.push('Priorize a ingestão de cálcio e vitamina D para saúde óssea.');
+                    dicas.push('Exercícios de equilíbrio são importantes para prevenir quedas.');
+                }
+                
+                return dicas;
+            }
+
+            // Função para atualizar a exibição do histórico
+            function atualizarExibicaoHistorico() {
+                if (historico.length === 0) {
+                    listaHistorico.innerHTML = '<p class="estado-vazio">Seu histórico aparecerá aqui.</p>';
+                    return;
+                }
+                
+                listaHistorico.innerHTML = '';
+                
+                // Ordenar histórico por data (mais recente primeiro)
+                const historicoOrdenado = [...historico].reverse();
+                
+                historicoOrdenado.forEach(item => {
+                    const itemHistoricoEl = document.createElement('div');
+                    itemHistoricoEl.className = 'item-historico';
+                    itemHistoricoEl.innerHTML = `
+                        <div>
+                            <strong>${item.data}</strong> - ${item.nome}
+                        </div>
+                        <div>
+                            ${item.peso} kg (IMC: ${item.imc})
+                        </div>
+                    `;
+                    listaHistorico.appendChild(itemHistoricoEl);
+                });
+            }
+
+            // Função para atualizar o gráfico de progresso
+            function atualizarGraficoProgresso() {
+                graficoProgresso.innerHTML = '';
+                
+                if (historico.length < 2) {
+                    const mensagemVazia = document.createElement('p');
+                    mensagemVazia.textContent = 'Pelo menos 2 medições são necessárias para mostrar o progresso.';
+                    graficoProgresso.appendChild(mensagemVazia);
+                    return;
+                }
+                
+                // Obter as últimas 7 entradas para o gráfico
+                const dadosGrafico = historico.slice(-7);
+                
+                // Encontrar valores mínimos e máximos para escala
+                const valoresImc = dadosGrafico.map(item => parseFloat(item.imc));
+                const imcMinimo = Math.min(...valoresImc);
+                const imcMaximo = Math.max(...valoresImc);
+                const intervalo = imcMaximo - imcMinimo;
+                
+                // Criar barras
+                dadosGrafico.forEach((item, indice) => {
+                    const barra = document.createElement('div');
+                    barra.className = 'barra-grafico';
+                    
+                    // Calcular porcentagem de altura (mínimo 10% para visibilidade)
+                    const porcentagemAltura = intervalo === 0 ? 50 : 
+                        10 + ((parseFloat(item.imc) - imcMinimo) / intervalo) * 90;
+                    
+                    barra.style.height = `${porcentagemAltura}%`;
+                    barra.setAttribute('data-valor', item.imc);
+                    
+                    // Adicionar etiqueta de data
+                    const etiquetaData = document.createElement('div');
+                    etiquetaData.style.position = 'absolute';
+                    etiquetaData.style.bottom = '-25px';
+                    etiquetaData.style.left = '50%';
+                    etiquetaData.style.transform = 'translateX(-50%)';
+                    etiquetaData.style.fontSize = '0.7rem';
+                    etiquetaData.textContent = new Date().toLocaleDateString();
+                    
+                    barra.appendChild(etiquetaData);
+                    graficoProgresso.appendChild(barra);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
